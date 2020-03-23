@@ -1,0 +1,8 @@
+/.idea/
+/logs/
+/nextcloud/
+/databases/
+/configs/certbot/
+/configs/nextcloud/
+/docker-compose.yml
+/configs/nginx/conf.d/default.conf

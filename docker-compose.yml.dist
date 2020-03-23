@@ -1,0 +1,59 @@
+version: '3.7'
+
+services:
+
+  nginx:
+    restart: unless-stopped
+    image: nginx:latest
+    ports:
+    - 80:80
+    - 443:443
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    volumes:
+    - ./configs/nginx/conf.d:/etc/nginx/conf.d:ro
+    - ./configs/nginx/certbot:/etc/nginx/certbot:ro
+    - ./configs/certbot/conf:/etc/letsencrypt:rw
+    - ./configs/certbot/www:/var/www/certbot:rw
+    - ./nextcloud:/var/www/html:ro
+    - ./logs/nginx:/var/log/nginx
+
+  certbot:
+    restart: unless-stopped
+    image: certbot/certbot:latest
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - ./configs/certbot/conf:/etc/letsencrypt:rw
+    - ./configs/certbot/www:/var/www/certbot:rw
+
+  nextcloud:
+    restart: unless-stopped
+    image: nextcloud:fpm-alpine
+    ports:
+    - "127.0.0.1:9000:9000"
+    volumes:
+    - ./nextcloud:/var/www/html:rw
+
+  mariadb:
+    restart: unless-stopped
+    image: mariadb:latest
+    ports:
+    - 127.0.0.1:3306:3306
+    volumes:
+    - ./databases/mariadb:/var/lib/mysql
+    environment:
+    - MYSQL_ROOT_PASSWORD=rootroot
+    - MYSQL_ROOT_HOST=%
+    - MYSQL_DATABASE=nextcloud
+    - MYSQL_USER=nextcloud
+    - MYSQL_PASSWORD=nextcloud_pass
+
+  phpmyadmin:
+    restart: unless-stopped
+    image: phpmyadmin/phpmyadmin
+    ports:
+    - 127.0.0.1:8080:80
+    environment:
+    - PMA_HOST=mariadb
+    - PMA_USER=nextcloud
+    - PMA_PASSWORD=nextcloud_pass

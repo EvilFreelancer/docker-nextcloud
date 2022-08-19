@@ -16,6 +16,7 @@ services:
     - ./configs/certbot/www:/var/www/certbot:rw
     - ./nextcloud:/var/www/html:ro
     - ./logs/nginx:/var/log/nginx
+    
 
   certbot:
     restart: unless-stopped
@@ -25,6 +26,8 @@ services:
     - /etc/localtime:/etc/localtime:ro
     - ./configs/certbot/conf:/etc/letsencrypt:rw
     - ./configs/certbot/www:/var/www/certbot:rw
+    depends_on: 
+      - nginx
 
   nextcloud:
     restart: unless-stopped
@@ -33,7 +36,9 @@ services:
     - "127.0.0.1:9000:9000"
     volumes:
     - ./nextcloud:/var/www/html:rw
-
+    depends_on:
+      - certbot
+  
   mariadb:
     restart: unless-stopped
     image: mariadb:latest
@@ -47,6 +52,8 @@ services:
     - MYSQL_DATABASE=nextcloud
     - MYSQL_USER=nextcloud
     - MYSQL_PASSWORD=nextcloud_pass
+    depends_on:
+      - nextcloud
 
   phpmyadmin:
     restart: unless-stopped
@@ -57,3 +64,5 @@ services:
     - PMA_HOST=mariadb
     - PMA_USER=nextcloud
     - PMA_PASSWORD=nextcloud_pass
+    depends_on:
+      - nextcloud

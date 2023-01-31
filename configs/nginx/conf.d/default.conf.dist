@@ -26,7 +26,7 @@ server {
     # Add headers to serve security related headers
     # Before enabling Strict-Transport-Security headers please read into this
     # topic first.
-    # add_header Strict-Transport-Security "max-age=15768000;
+    add_header Strict-Transport-Security "max-age=15768000;
     # includeSubDomains; preload;";
     #
     # WARNING: Only add the preload option once you read about
@@ -34,12 +34,14 @@ server {
     # will add the domain to a hardcoded list that is shipped
     # in all major browsers and getting removed from this list
     # could take several months.
-    add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block";
-    add_header X-Robots-Tag none;
-    add_header X-Download-Options noopen;
-    add_header X-Permitted-Cross-Domain-Policies none;
-    add_header Referrer-Policy no-referrer;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Robots-Tag "none" always;
+    add_header X-Download-Options "noopen" always;
+    add_header X-Permitted-Cross-Domain-Policies "none" always;
+    add_header Referrer-Policy "no-referrer" always;
 
     root /var/www/html;
 
@@ -61,6 +63,9 @@ server {
     location = /.well-known/caldav {
         return 301 $scheme://$host/remote.php/dav;
     }
+    
+    rewrite ^/.well-known/webfinger /index.php/.well-known/webfinger redirect;    
+    rewrite ^/.well-known/nodeinfo  /index.php/.well-known/nodeinfo  redirect;
 
     # set max upload size
     client_max_body_size 10G;
@@ -118,7 +123,7 @@ server {
         # have those duplicated to the ones above)
         # Before enabling Strict-Transport-Security headers please read into
         # this topic first.
-        # add_header Strict-Transport-Security "max-age=15768000;
+        add_header Strict-Transport-Security "max-age=15768000;
         #  includeSubDomains; preload;";
         #
         # WARNING: Only add the preload option once you read about
@@ -126,13 +131,15 @@ server {
         # will add the domain to a hardcoded list that is shipped
         # in all major browsers and getting removed from this list
         # could take several months.
-        add_header X-Content-Type-Options nosniff;
-        add_header X-XSS-Protection "1; mode=block";
-        add_header X-Robots-Tag none;
-        add_header X-Download-Options noopen;
-        add_header X-Permitted-Cross-Domain-Policies none;
-        add_header Referrer-Policy no-referrer;
-
+        
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header X-Robots-Tag "none" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Download-Options "noopen" always;
+        add_header X-Permitted-Cross-Domain-Policies "none" always;
+        add_header Referrer-Policy "no-referrer" always;
+        
         # Optional: Don't log access to assets
         access_log off;
     }
